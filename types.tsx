@@ -10,8 +10,10 @@ declare global {
 }
 
 export type RootStackParamList = {
+    Home: undefined,
     Login: undefined,
     SignUp: undefined,
+    AuthCodeInput: undefined,
     Root: NavigatorScreenParams<RootTabParamList> | undefined;
 }
 
@@ -37,6 +39,10 @@ CompositeScreenProps<
     NativeStackScreenProps<RootStackParamList>
 >;
 
+export type HomeScreenProps = NativeStackScreenProps<
+    RootStackParamList,
+    "Home"
+>
 export type LoginScreenProps = NativeStackScreenProps<
     RootStackParamList,
     "Login"
@@ -45,6 +51,11 @@ export type LoginScreenProps = NativeStackScreenProps<
 export type SignUpScreenProps = NativeStackScreenProps<
     RootStackParamList,
     "SignUp"
+>
+
+export type AuthCodeInputScreenProps = NativeStackScreenProps<
+    RootStackParamList,
+    "AuthCodeInput"
 >
 
 export type TabOneStackScreenProps<Screen extends keyof TabOneStackParamList> =

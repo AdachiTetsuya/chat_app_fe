@@ -44,10 +44,8 @@ export const Login: React.FC<LoginScreenProps> = () => {
                 },
             )
             .then((res): void => {
-                console.log(res)
                 if (res.status == 200){
-                    console.log(res.data)
-                    setUser({username: res.data.user.first_name, isLoggedIn: true});
+                    setUser({username: "", isLoggedIn: true});
                     save("accessToken", res.data.access_token);
                     save("refreshToken", res.data.refresh_token);
                 }
@@ -89,6 +87,7 @@ export const Login: React.FC<LoginScreenProps> = () => {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.inner}>
                     <View style={styles.content}>
+                        <Text>ログイン</Text>
                         <TextInput
                             onChangeText={setEmail}
                             error={Boolean(errorMsg1.length)}

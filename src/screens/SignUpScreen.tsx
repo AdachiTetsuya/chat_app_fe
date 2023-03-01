@@ -3,8 +3,6 @@ import { authAxios } from "../api/axios";
 import { useContext, useState, useEffect } from "react";
 import { SignUpScreenProps } from "../../types";
 
-import { UserInfoContext } from "../provider/UserInfoProvider";
-import { save } from "../hooks/useSecureStore";
 import { postPushToken } from "../api/postPushToken";
 import * as dg from "../constants/design-variables"; 
 import { TextInput } from 'react-native-paper';
@@ -12,7 +10,7 @@ import { TextInput } from 'react-native-paper';
 
 const WindowWidth = Dimensions.get('window').width;
 
-export const SignUp: React.FC<SignUpScreenProps> = () => {
+export const SignUp: React.FC<SignUpScreenProps> = ({navigation}) => {
 
     const [ username, setUsername] = useState<string>(""); 
     const [ email ,setEmail] = useState<string>(""); 
@@ -23,8 +21,6 @@ export const SignUp: React.FC<SignUpScreenProps> = () => {
     const [ errorMsgUsername, setErrorMsgUsername ] = useState<string[]>([]);
     const [ errorMsgEmail, setErrorMsgEmail ] = useState<string[]>([]);
     const [ errorMsgPassword, setErrorMsgPassword ] = useState<string[]>([]);
-
-    const { setUser } = useContext(UserInfoContext);
 
     // フィールドのバリデーション
     const checkFiledNotNull = () => {
@@ -44,16 +40,14 @@ export const SignUp: React.FC<SignUpScreenProps> = () => {
                     email: email,
                     password1: password1,
                     password2: password2,
-
                 },
             )
             .then((res): void => {
                 console.log(res)
-                if (res.status == 200 || res.status == 201){
+                if (res.status == 201){
                     console.log(res.data)
-                    setUser({username: res.data.user.first_name, isLoggedIn: true});
-                    save("accessToken", res.data.access_token);
-                    save("refreshToken", res.data.refresh_token);
+                    // 認証コード入力画面に遷移
+                    navigation.navigate("AuthCodeInput")
                 }
                 
             })
@@ -98,6 +92,7 @@ export const SignUp: React.FC<SignUpScreenProps> = () => {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.inner}>
                     <View style={styles.content}>
+                        <Text>会員登録</Text>
                         <TextInput
                             onChangeText={setUsername}
                             error={Boolean(errorMsgUsername.length)}

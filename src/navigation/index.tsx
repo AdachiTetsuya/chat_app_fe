@@ -1,11 +1,14 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { RootNavigator } from './RootNavigator';
+import { UserInfoProvider } from '../provider/UserInfoProvider';
 
 
 export default function Navigation() {
     return (
         <NavigationContainer>
-            <RootNavigator />
+            <UserInfoProvider>
+                <RootNavigator />
+            </UserInfoProvider>
         </NavigationContainer>
     )
 }
