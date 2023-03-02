@@ -1,6 +1,4 @@
-
-
 export type authCodePostType = {
-    auth_code: string,
-    type: string,
-}
+  auth_code: string;
+  type: string;
+};

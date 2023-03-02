@@ -1,12 +1,13 @@
 import { DefaultTheme } from '@react-navigation/native';
-import * as dg from "../constants/design-variables";
+
+import * as dg from '../constants/design-variables';
 
 const MyTheme = {
-	...DefaultTheme,
-	colors: {
-		...DefaultTheme.colors,
-		primary: `${dg.background}`,
-	},
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: `${dg.background}`,
+  },
 };
 
-export default MyTheme
+export default MyTheme;
