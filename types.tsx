@@ -9,13 +9,23 @@ declare global {
 }
 
 export type RootStackParamList = {
-  Home: undefined;
+  Index: undefined;
   Login: undefined;
-  SignUp: undefined;
-  PasswordReset: undefined;
-  AuthCodeInput: {
+  SignUp: {
+    email: string;
+  };
+  EmailInput: {
     authType: string;
   };
+  AuthCodeInput: {
+    authType: string;
+    email: string;
+  };
+  PasswordReset: undefined;
+  PasswordChange: undefined;
+  Profile: undefined;
+  Home: undefined;
+
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
 };
 
@@ -38,12 +48,19 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
   NativeStackScreenProps<RootStackParamList>
 >;
 
-export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
+export type IndexScreenProps = NativeStackScreenProps<RootStackParamList, 'Index'>;
 export type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
-export type PasswordResetScreenProps = NativeStackScreenProps<RootStackParamList, 'PasswordReset'>;
-
+export type EmailInputScreenProps = NativeStackScreenProps<RootStackParamList, 'EmailInput'>;
 export type AuthCodeInputScreenProps = NativeStackScreenProps<RootStackParamList, 'AuthCodeInput'>;
+export type PasswordResetScreenProps = NativeStackScreenProps<RootStackParamList, 'PasswordReset'>;
+export type ProfileScreenProps = NativeStackScreenProps<RootStackParamList, 'Profile'>;
+export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+export type PasswordChangeScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'PasswordChange'
+>;
 
 export type TabOneStackScreenProps<Screen extends keyof TabOneStackParamList> =
   CompositeScreenProps<

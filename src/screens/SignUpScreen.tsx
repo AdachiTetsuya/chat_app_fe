@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import {
-  Dimensions,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -12,27 +11,30 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-import { SignUpScreenProps } from '../../types';
-import { authAxios } from '../api/axios';
-import { postPushToken } from '../api/postPushToken';
-import * as dg from '../constants/design-variables';
+import { authAxios } from 'api/axios';
+import { save } from 'hooks/useSecureStore';
 
-const WindowWidth = Dimensions.get('window').width;
+import { UserInfoContext } from 'provider/UserInfoProvider';
 
-export const SignUp: React.FC<SignUpScreenProps> = ({ navigation }) => {
-  const [username, setUsername] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
+// import { postPushToken } from 'api/postPushToken';
+import { SignUpScreenProps } from 'rootTypes';
+
+import * as dg from 'constants/design-variables';
+
+export const SignUp: React.FC<SignUpScreenProps> = ({ navigation, route }) => {
+  const { email } = route.params;
   const [password1, setPassword1] = useState<string>('');
   const [password2, setPassword2] = useState<string>('');
 
-  const [errorMsgUsername, setErrorMsgUsername] = useState<string[]>([]);
-  const [errorMsgEmail, setErrorMsgEmail] = useState<string[]>([]);
-  const [errorMsgPassword, setErrorMsgPassword] = useState<string[]>([]);
+  const [errorMsgPassword1, setErrorMsgPassword1] = useState<string[]>([]);
+  const [errorMsgPassword2, setErrorMsgPassword2] = useState<string[]>([]);
+
+  const { setUser } = useContext(UserInfoContext);
 
   // フィールドのバリデーション
   const checkFiledNotNull = () => {
     let result: boolean = false;
-    if (username && email && password1 && password2) {
+    if (password1 && password2) {
       result = true;
     }
     return result;
@@ -42,51 +44,43 @@ export const SignUp: React.FC<SignUpScreenProps> = ({ navigation }) => {
     if (checkFiledNotNull()) {
       await authAxios
         .post('/dj-rest-auth/registration/', {
-          username,
           email,
           password1,
           password2,
         })
         .then((res): void => {
-          console.log(res);
           if (res.status === 201) {
-            console.log(res.data);
-            // 認証コード入力画面に遷移
-            navigation.navigate('AuthCodeInput', {
-              authType: 'signUp',
-            });
+            save('accessToken', res.data!.access_token);
+            save('refreshToken', res.data!.refresh_token);
+            setUser((prev) => ({ ...prev, ...{ isLoggedIn: true } }));
           }
         })
         .catch((err) => {
           const errorObj = err.response.data;
+          console.log(errorObj);
           for (const element of Object.keys(errorObj)) {
             switch (element) {
-              case 'username':
-                setErrorMsgUsername(errorObj[element]);
+              case 'password1':
+                setErrorMsgPassword1(errorObj[element]);
                 break;
-              case 'email':
-                setErrorMsgEmail(errorObj[element]);
-                break;
-              case 'password':
-                setErrorMsgPassword(errorObj[element]);
+              case 'password2':
+                setErrorMsgPassword2(errorObj[element]);
                 break;
               default:
-                setErrorMsgPassword(['エラーがあります']);
+                setErrorMsgPassword1(['エラーがあります']);
             }
           }
         });
     } else {
-      username || setErrorMsgUsername(['このフィールドは必須です']);
-      email || setErrorMsgEmail(['このフィールドは必須です']);
-      password1 || setErrorMsgPassword(['このフィールドは必須です']);
-      password2 || setErrorMsgPassword(['このフィールドは必須です']);
+      password1 || setErrorMsgPassword1(['このフィールドは必須です']);
+      password2 || setErrorMsgPassword2(['このフィールドは必須です']);
     }
   };
 
   useEffect(() => {
     // Unmount 時の処理
     return () => {
-      postPushToken();
+      // postPushToken();
     };
   }, []);
 
@@ -97,72 +91,55 @@ export const SignUp: React.FC<SignUpScreenProps> = ({ navigation }) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <View style={styles.content}>
-            <Text>会員登録</Text>
-            <TextInput
-              onChangeText={setUsername}
-              error={Boolean(errorMsgUsername.length)}
-              onFocus={() => setErrorMsgUsername([])}
-              contextMenuHidden={true}
-              mode="outlined"
-              label="お名前"
-              outlineColor={dg.border}
-              activeOutlineColor={dg.primary}
-              style={styles.input}
-              placeholderTextColor="rgba(0, 0, 0, 0.6)"
-            />
-            {<Text style={styles.errorMsg}>{errorMsgUsername}</Text>}
-            <TextInput
-              onChangeText={setEmail}
-              error={Boolean(errorMsgEmail.length)}
-              onFocus={() => setErrorMsgEmail([])}
-              contextMenuHidden={true}
-              mode="outlined"
-              label="メールアドレス"
-              outlineColor={dg.border}
-              activeOutlineColor={dg.primary}
-              style={styles.input}
-              placeholderTextColor="rgba(0, 0, 0, 0.6)"
-            />
-            {<Text style={styles.errorMsg}>{errorMsgEmail}</Text>}
+            <Text style={styles.topText}>パスワードの設定</Text>
+            <View style={styles.passwordCautionBoard}>
+              <Text style={styles.passwordCautionText}>
+                パスワードの条件{'\n'}
+                ・あなたの他の個人情報と似ているパスワードにはできません。{'\n'}
+                ・パスワードは最低 8 文字以上必要です。{'\n'}
+                ・よく使われるパスワードにはできません。{'\n'}
+                ・数字だけのパスワードにはできません。
+              </Text>
+            </View>
             <TextInput
               onChangeText={setPassword1}
-              error={Boolean(errorMsgPassword.length)}
-              onFocus={() => setErrorMsgPassword([])}
-              contextMenuHidden={true}
+              error={Boolean(errorMsgPassword1.length)}
+              onFocus={() => setErrorMsgPassword1([])}
+              contextMenuHidden
               mode="outlined"
               label="パスワード"
               outlineColor={dg.border}
               activeOutlineColor={dg.primary}
               style={styles.input}
               placeholderTextColor="rgba(0, 0, 0, 0.6)"
-              secureTextEntry={true}
+              secureTextEntry
             />
+            <Text style={styles.errorMsg}>{errorMsgPassword1}</Text>
             <TextInput
               onChangeText={setPassword2}
-              error={Boolean(errorMsgPassword.length)}
-              onFocus={() => setErrorMsgPassword([])}
-              contextMenuHidden={true}
+              error={Boolean(errorMsgPassword2.length)}
+              onFocus={() => setErrorMsgPassword2([])}
+              contextMenuHidden
               mode="outlined"
-              label="パスワードを再入力"
+              label="パスワード (確認)"
               outlineColor={dg.border}
               activeOutlineColor={dg.primary}
               style={styles.input}
               placeholderTextColor="rgba(0, 0, 0, 0.6)"
-              secureTextEntry={true}
+              secureTextEntry
             />
-            {<Text style={styles.errorMsg}>{errorMsgPassword}</Text>}
+            <Text style={styles.errorMsg}>{errorMsgPassword2}</Text>
             <TouchableOpacity
               style={[
                 styles.buttonContainer,
-                checkFiledNotNull() &&
-                !(errorMsgUsername.length || errorMsgEmail.length || errorMsgPassword.length)
+                checkFiledNotNull() && !(errorMsgPassword1.length || errorMsgPassword2.length)
                   ? { backgroundColor: dg.primary }
                   : {},
               ]}
               onPress={onSubmit}
               activeOpacity={0.5}>
               <View style={styles.buttonTextWrap}>
-                <Text style={styles.buttonText}>ユーザー登録</Text>
+                <Text style={styles.buttonText}>登録を完了</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -179,16 +156,22 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
     width: '90%',
   },
-  logoWrap: {
-    width: WindowWidth * 0.9,
-    height: WindowWidth * 0.9 * 0.3,
-    marginBottom: 30,
+  topText: {
+    fontWeight: '500',
+    fontSize: 19,
+    paddingTop: 30,
+    paddingBottom: 20,
+  },
+  passwordCautionBoard: {},
+  passwordCautionText: {
+    marginBottom: 10,
+    fontSize: 12,
+    color: dg.midEmphasisBlack,
   },
   input: {
     marginTop: 10,

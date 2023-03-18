@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { useContext, useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -12,19 +11,21 @@ import {
   View,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
+import { BottomSignUpComponent } from 'features/auth/components/BottomSignUpComponent';
 
-import { LoginScreenProps } from '../../types';
-import { authAxios } from '../api/axios';
-import { postPushToken } from '../api/postPushToken';
-import * as dg from '../constants/design-variables';
-import { save } from '../hooks/useSecureStore';
-import { UserInfoContext } from '../provider/UserInfoProvider';
+import { save } from 'hooks/useSecureStore';
+import { authAxios } from 'api/axios';
+
+import { UserInfoContext } from 'provider/UserInfoProvider';
+
+import { LoginScreenProps } from 'rootTypes';
+
+import * as dg from 'constants/design-variables';
+// import { postPushToken } from 'api/postPushToken';
 
 const WindowWidth = Dimensions.get('window').width;
 
-export const Login: React.FC<LoginScreenProps> = () => {
-  const navigation = useNavigation();
-
+export const Login: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
@@ -50,8 +51,10 @@ export const Login: React.FC<LoginScreenProps> = () => {
           password,
         })
         .then((res): void => {
+          console.log(res);
           if (res.status === 200) {
-            setUser({ username: '', isLoggedIn: true });
+            console.log(res.data);
+            setUser({ username: res.data.user.first_name, isLoggedIn: true });
             save('accessToken', res.data.access_token);
             save('refreshToken', res.data.refresh_token);
           }
@@ -81,7 +84,7 @@ export const Login: React.FC<LoginScreenProps> = () => {
   useEffect(() => {
     // Unmount 時の処理
     return () => {
-      postPushToken();
+      // postPushToken();
     };
   }, []);
 
@@ -92,12 +95,11 @@ export const Login: React.FC<LoginScreenProps> = () => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <View style={styles.content}>
-            <Text>ログイン</Text>
             <TextInput
               onChangeText={setEmail}
               error={Boolean(errorMsg1.length)}
               onFocus={() => setErrorMsg1([])}
-              contextMenuHidden={true}
+              contextMenuHidden
               mode="outlined"
               label="メールアドレス"
               outlineColor={dg.border}
@@ -105,21 +107,21 @@ export const Login: React.FC<LoginScreenProps> = () => {
               style={styles.input}
               placeholderTextColor="rgba(0, 0, 0, 0.6)"
             />
-            {<Text style={styles.errorMsg}>{errorMsg1}</Text>}
+            <Text style={styles.errorMsg}>{errorMsg1}</Text>
             <TextInput
               onChangeText={setPassword}
               error={Boolean(errorMsg2.length)}
               onFocus={() => setErrorMsg2([])}
-              contextMenuHidden={true}
+              contextMenuHidden
               mode="outlined"
               label="パスワード"
               outlineColor={dg.border}
               activeOutlineColor={dg.primary}
               style={styles.input}
               placeholderTextColor="rgba(0, 0, 0, 0.6)"
-              secureTextEntry={true}
+              secureTextEntry
             />
-            {<Text style={styles.errorMsg}>{errorMsg2}</Text>}
+            <Text style={styles.errorMsg}>{errorMsg2}</Text>
             <TouchableOpacity
               style={[
                 styles.buttonContainer,
@@ -135,21 +137,17 @@ export const Login: React.FC<LoginScreenProps> = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('SignUp');
+                navigation.navigate('EmailInput', {
+                  authType: 'passwordReset',
+                });
               }}
               style={styles.signInButton}>
-              <Text>アカウントをお持ちでない方はこちら</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('PasswordReset');
-              }}
-              style={styles.signInButton}>
-              <Text>パスワードを忘れた方はこちら</Text>
+              <Text>パスワードをお忘れですか？</Text>
             </TouchableOpacity>
           </View>
         </View>
       </TouchableWithoutFeedback>
+      <BottomSignUpComponent navigation={navigation} screenName="login" />
     </KeyboardAvoidingView>
   );
 };
@@ -209,5 +207,29 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     paddingTop: 10,
+  },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 60,
+    width: '100%',
+    backgroundColor: dg.surface,
+    borderTopColor: dg.border,
+    borderTopWidth: 1,
+  },
+  pressable: {
+    marginLeft: 10,
+    width: 60,
+    height: 40,
+    borderRadius: 5,
+    justifyContent: 'center',
+  },
+  submitText: {
+    textAlign: 'center',
+    fontWeight: '500',
+    fontSize: 14,
   },
 });

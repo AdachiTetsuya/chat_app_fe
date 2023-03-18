@@ -37,7 +37,7 @@ export const Home: React.FC<Props> = ({ navigation }: Props) => {
 
   return (
     <>
-      <View style={styles.topBorder}></View>
+      <View style={styles.topBorder} />
       <View style={styles.container}>
         <Pressable
           onPress={createTwoButtonAlert}

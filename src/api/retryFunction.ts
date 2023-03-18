@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useRefreshToken } from './useRefreshToken';
 import { loginRequiredReturn } from '../constants/objectData';
 

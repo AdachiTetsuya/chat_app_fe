@@ -1,8 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
 
-// APIURL
-// const apiURLDomain = process.env.REACT_APP_API_URL_DOMAIN;
-
 // const apiURLDomain = "http://192.168.1.212:8000";
 const apiURLDomain = 'http://192.168.0.122:8000';
 

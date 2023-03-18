@@ -1,7 +1,8 @@
 module.exports = {
-  extends: ['universe'],
+  extends: ['universe/native'],
   plugins: ['import', 'unused-imports'],
   rules: {
+    'no-unused-expressions': ['error', { allowTernary: true, allowShortCircuit: true }],
     'import/order': [
       'error',
       {
@@ -9,27 +10,46 @@ module.exports = {
           'builtin', // 組み込みモジュール
           'external', // npmでインストールした外部ライブラリ
           'internal', // 自作モジュール
-          ['parent', 'sibling'],
+          ['sibling', 'parent'],
           'object',
           'type',
           'index',
         ],
-        'newlines-between': 'always', // グループ毎にで改行を入れる
-        pathGroupsExcludedImportTypes: ['builtin'],
+        pathGroupsExcludedImportTypes: ['index'],
         alphabetize: {
-          order: 'asc', // 昇順にソート
           caseInsensitive: true, // 小文字大文字を区別する
         },
+        'newlines-between': 'always', // グループ毎にで改行を入れる
         pathGroups: [
           // 指定した順番にソートされる
           {
-            pattern: '@/components/common',
+            pattern: 'screens/**',
             group: 'internal',
             position: 'before',
           },
           {
-            pattern: '@/components/hooks',
+            pattern: '{api/**,hooks/**}',
             group: 'internal',
+            position: 'before',
+          },
+          {
+            pattern: 'components/**',
+            group: 'internal',
+            position: 'before',
+          },
+          {
+            pattern: '{provider/**,navigation/**}',
+            group: 'internal',
+            position: 'before',
+          },
+          {
+            pattern: '{types/**,utils/**,rootTypes}',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '{icons/**,constants/**}',
+            group: 'object',
             position: 'before',
           },
         ],

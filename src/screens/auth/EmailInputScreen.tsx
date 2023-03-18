@@ -11,15 +11,18 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-import { PasswordResetScreenProps as Props } from '../../types';
-import { authAxios } from '../api/axios';
-import * as dg from '../constants/design-variables';
-import { emailValidation } from '../utils/utils';
+import { postResisterEmail } from 'api/auth/postResisterEmail';
+import { postPasswordResetEmail } from 'api/auth/postPasswordResetEmail';
 
-export const PasswordReset: React.FC<Props> = ({ navigation }: Props) => {
-  const [email, setEmail] = useState<string>('');
+import { emailValidation } from 'utils/utils';
+import { EmailInputScreenProps as Props } from 'rootTypes';
+
+import * as dg from 'constants/design-variables';
+
+export const EmailInput: React.FC<Props> = ({ navigation, route }) => {
+  const { authType } = route.params;
+  const [email, setEmail] = useState('');
   const [errorMsg, setErrorMsg] = useState<string>('');
-  console.log(errorMsg);
 
   // フィールドのバリデーション
   const checkFiledNotNull = () => {
@@ -36,20 +39,42 @@ export const PasswordReset: React.FC<Props> = ({ navigation }: Props) => {
         setErrorMsg('メールアドレスの形式が間違っています');
         return;
       }
-      await authAxios
-        .post('/dj-rest-auth/password/reset/', {
-          email,
-        })
-        .then((res): void => {
-          if (res.status === 200) {
-            navigation.navigate('AuthCodeInput', {
-              authType: 'passwordReset',
-            });
+      const postData = {
+        email,
+      };
+      if (authType === 'signUp') {
+        const res = await postResisterEmail(postData);
+        if (res.result) {
+          navigation.navigate('AuthCodeInput', {
+            authType: 'signUp',
+            email,
+          });
+        } else {
+          const errorObj: any = res.error;
+          switch (Object.keys(errorObj!)[0]) {
+            case 'email':
+              setErrorMsg(errorObj!.email[0]);
+              break;
           }
-        })
-        .catch((err) => {
-          console.log(err.response.data);
-        });
+        }
+      } else {
+        const res = await postPasswordResetEmail(postData);
+        if (res.result) {
+          navigation.navigate('AuthCodeInput', {
+            authType: 'passwordReset',
+            email,
+          });
+        } else {
+          const errorObj: any = res.error;
+          switch (Object.keys(errorObj!)[0]) {
+            case 'email':
+              setErrorMsg(errorObj!.email[0]);
+              break;
+          }
+        }
+      }
+    } else {
+      email || setErrorMsg('このフィールドは必須です');
     }
   };
 
@@ -60,7 +85,14 @@ export const PasswordReset: React.FC<Props> = ({ navigation }: Props) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <View style={styles.content}>
-            <Text>メールアドレス入力</Text>
+            <Text style={styles.topText}>
+              {authType === 'signUp' ? 'メールアドレスの登録' : '使用中のメールアドレス'}
+            </Text>
+            <Text style={styles.secondeText}>
+              {authType === 'signUp'
+                ? 'メールで認証コードが送られます。'
+                : 'メールで再設定コードが送られます。'}
+            </Text>
             <TextInput
               onChangeText={(text) => {
                 setEmail(text);
@@ -74,17 +106,16 @@ export const PasswordReset: React.FC<Props> = ({ navigation }: Props) => {
               style={styles.input}
               placeholderTextColor="rgba(0, 0, 0, 0.6)"
             />
-            {<Text style={styles.errorMsg}>{errorMsg}</Text>}
-
+            <Text style={styles.errorMsg}>{errorMsg}</Text>
             <TouchableOpacity
               style={[
                 styles.buttonContainer,
-                checkFiledNotNull() ? { backgroundColor: dg.primary } : {},
+                emailValidation(email) ? { backgroundColor: dg.primary } : {},
               ]}
               onPress={onSubmit}
               activeOpacity={0.5}>
               <View style={styles.buttonTextWrap}>
-                <Text style={styles.buttonText}>メールアドレス送信</Text>
+                <Text style={styles.buttonText}>次へ</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -101,11 +132,21 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
     width: '90%',
+  },
+  topText: {
+    fontWeight: '500',
+    fontSize: 19,
+    paddingTop: 30,
+    paddingBottom: 20,
+  },
+  secondeText: {
+    fontSize: 16,
+    color: dg.midEmphasisBlack,
+    paddingBottom: 20,
   },
   input: {
     marginTop: 10,
@@ -120,9 +161,20 @@ const styles = StyleSheet.create({
     color: '#CC1436',
     fontSize: 12,
   },
+  announceTextContainer: {
+    marginTop: 10,
+  },
+  announceText: {},
+  announceTextLinkBoard: {
+    justifyContent: 'flex-end',
+  },
+  announceTextLink: {
+    height: 15,
+    fontWeight: '500',
+  },
   buttonContainer: {
     marginTop: 50,
-    marginBottom: 20,
+    marginBottom: 50,
     borderRadius: 3,
     width: '100%',
     height: 50,

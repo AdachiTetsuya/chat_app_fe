@@ -1,10 +1,10 @@
 import { StackActions, useNavigation } from '@react-navigation/native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import * as dg from '../../constants/design-variables';
-import LeftIcon from '../../icons/left';
+import * as dg from 'constants/design-variables';
+import LeftIcon from 'icons/left';
 
-export const HeaderBackButton = () => {
+export const HeaderBackButton = ({ screenName }: { screenName: string }) => {
   const navigation = useNavigation();
   const popAction = StackActions.pop(1);
 
@@ -22,6 +22,7 @@ export const HeaderBackButton = () => {
         ]}>
         <LeftIcon />
       </Pressable>
+      <Text style={styles.title}>{screenName}</Text>
     </View>
   );
 };
@@ -40,5 +41,6 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: dg.highEmphasisBlack,
     fontWeight: '500',
+    width: 250,
   },
 });
