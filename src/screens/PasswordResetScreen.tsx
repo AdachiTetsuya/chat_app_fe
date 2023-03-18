@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -11,24 +11,20 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-import { AuthCodeInputScreenProps as Props } from '../../types';
-import { postEmailAuthCode } from '../api/postEmailAuthCode';
+import { PasswordResetScreenProps as Props } from '../../types';
+import { authAxios } from '../api/axios';
 import * as dg from '../constants/design-variables';
-import { save } from '../hooks/useSecureStore';
-import { UserInfoContext } from '../provider/UserInfoProvider';
+import { emailValidation } from '../utils/utils';
 
-export const AuthCodeInput: React.FC<Props> = ({ navigation, route }) => {
-  const { authType } = route.params;
-
-  const [authCode, setauthCode] = useState<string>('');
+export const PasswordReset: React.FC<Props> = ({ navigation }: Props) => {
+  const [email, setEmail] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
-
-  const { setUser } = useContext(UserInfoContext);
+  console.log(errorMsg);
 
   // フィールドのバリデーション
   const checkFiledNotNull = () => {
     let result = false;
-    if (authCode) {
+    if (email) {
       result = true;
     }
     return result;
@@ -36,24 +32,24 @@ export const AuthCodeInput: React.FC<Props> = ({ navigation, route }) => {
 
   const onSubmit = async () => {
     if (checkFiledNotNull()) {
-      const postData = {
-        auth_code: authCode,
-        type: authType,
-      };
-      const res = await postEmailAuthCode(postData);
-      console.log(res);
-      if (res.result) {
-        switch (res.data!.type) {
-          case 'signUp':
-            setUser({ username: '', isLoggedIn: true });
-            save('accessToken', res.data!.jwtAuthData!.accessToken);
-            save('refreshToken', res.data!.jwtAuthData!.refreshToken);
-            break;
-          case 'passwordReset':
-        }
-      } else {
-        setErrorMsg('認証コードが違います');
+      if (!emailValidation(email)) {
+        setErrorMsg('メールアドレスの形式が間違っています');
+        return;
       }
+      await authAxios
+        .post('/dj-rest-auth/password/reset/', {
+          email,
+        })
+        .then((res): void => {
+          if (res.status === 200) {
+            navigation.navigate('AuthCodeInput', {
+              authType: 'passwordReset',
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err.response.data);
+        });
     }
   };
 
@@ -64,13 +60,15 @@ export const AuthCodeInput: React.FC<Props> = ({ navigation, route }) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <View style={styles.content}>
-            <Text>認証コード入力</Text>
+            <Text>メールアドレス入力</Text>
             <TextInput
-              onChangeText={setauthCode}
+              onChangeText={(text) => {
+                setEmail(text);
+                setErrorMsg('');
+              }}
               error={Boolean(errorMsg)}
-              onFocus={() => setErrorMsg('')}
               mode="outlined"
-              label="認証コード"
+              label="メールアドレス"
               outlineColor={dg.border}
               activeOutlineColor={dg.primary}
               style={styles.input}
@@ -86,7 +84,7 @@ export const AuthCodeInput: React.FC<Props> = ({ navigation, route }) => {
               onPress={onSubmit}
               activeOpacity={0.5}>
               <View style={styles.buttonTextWrap}>
-                <Text style={styles.buttonText}>認証コード送信</Text>
+                <Text style={styles.buttonText}>メールアドレス送信</Text>
               </View>
             </TouchableOpacity>
           </View>

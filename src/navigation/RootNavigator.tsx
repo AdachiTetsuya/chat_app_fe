@@ -2,10 +2,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useContext } from 'react';
 
 import { RootStackParamList } from '../../types';
+import { HeaderBackButton } from '../components/header/HeaderBackButton';
 import { UserInfoContext } from '../provider/UserInfoProvider';
 import { AuthCodeInput } from '../screens/AuthCodeInputScreen';
 import { Home } from '../screens/HomeScreen';
 import { Login } from '../screens/LoginScreen';
+import { PasswordReset } from '../screens/PasswordResetScreen';
 import { SignUp } from '../screens/SignUpScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,16 +42,21 @@ export const RootNavigator = () => {
             name="SignUp"
             component={SignUp}
             options={{
-              animation: 'none',
-              headerShown: false,
+              headerLeft: () => <HeaderBackButton />,
+            }}
+          />
+          <Stack.Screen
+            name="PasswordReset"
+            component={PasswordReset}
+            options={{
+              headerLeft: () => <HeaderBackButton />,
             }}
           />
           <Stack.Screen
             name="AuthCodeInput"
             component={AuthCodeInput}
             options={{
-              animation: 'none',
-              headerShown: false,
+              headerLeft: () => <HeaderBackButton />,
             }}
           />
         </Stack.Group>

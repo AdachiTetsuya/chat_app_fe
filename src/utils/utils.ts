@@ -30,3 +30,14 @@ export const increment = (index: number) => {
   const result = index + 1;
   return result;
 };
+
+export const emailValidation = (email: string) => {
+  const strongRegex = new RegExp('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$');
+  let result = false;
+
+  if (strongRegex.test(email)) {
+    result = true;
+  }
+
+  return result;
+};

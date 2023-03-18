@@ -140,6 +140,13 @@ export const Login: React.FC<LoginScreenProps> = () => {
               style={styles.signInButton}>
               <Text>アカウントをお持ちでない方はこちら</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('PasswordReset');
+              }}
+              style={styles.signInButton}>
+              <Text>パスワードを忘れた方はこちら</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableWithoutFeedback>

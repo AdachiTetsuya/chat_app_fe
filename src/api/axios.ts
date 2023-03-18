@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 // const apiURLDomain = process.env.REACT_APP_API_URL_DOMAIN;
 
 // const apiURLDomain = "http://192.168.1.212:8000";
-const apiURLDomain = 'http://192.168.0.101:8000';
+const apiURLDomain = 'http://192.168.0.122:8000';
 
 // const apiURLDomain = "https://api.tetusya-site.link/"
 

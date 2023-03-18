@@ -52,7 +52,9 @@ export const SignUp: React.FC<SignUpScreenProps> = ({ navigation }) => {
           if (res.status === 201) {
             console.log(res.data);
             // 認証コード入力画面に遷移
-            navigation.navigate('AuthCodeInput');
+            navigation.navigate('AuthCodeInput', {
+              authType: 'signUp',
+            });
           }
         })
         .catch((err) => {

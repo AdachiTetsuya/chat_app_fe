@@ -12,7 +12,10 @@ export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   SignUp: undefined;
-  AuthCodeInput: undefined;
+  PasswordReset: undefined;
+  AuthCodeInput: {
+    authType: string;
+  };
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
 };
 
@@ -37,8 +40,8 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
 
 export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 export type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
-
 export type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
+export type PasswordResetScreenProps = NativeStackScreenProps<RootStackParamList, 'PasswordReset'>;
 
 export type AuthCodeInputScreenProps = NativeStackScreenProps<RootStackParamList, 'AuthCodeInput'>;
 
